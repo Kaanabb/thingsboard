@@ -1,0 +1,24 @@
+---
+- hosts: all
+  become: true
+
+  tasks:
+    - name: Pull thingsboard image
+      docker_image:     
+        name: thingsboard/tb-postgres
+        source: pull
+
+    - name: Adding mytb-data
+      become: true
+      become_user: root
+      shell: mkdir -p ~/.mytb-data && sudo chown -R 799:799 ~/.mytb-data
+
+    - name: Adding mytb-logs                                                           
+      become: true
+      become_user: root
+      shell: mkdir -p ~/.mytb-logs && sudo chown -R 799:799 ~/.mytb-logs
+
+    - name: Run thingsboard                                                           
+      become: true
+      become_user: root
+      command:  docker run -it -p 9090:9090 -p 1883:1883 -p 7070:7070 -p 5683-5688:5683-5688/udp -v ~/.mytb-data:/data -v ~/.mytb-logs:/var/log/thingsboard --name mytb --restart always thingsboard/tb-postgres
